@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大象时间管理 - 全能时间管理工具</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+        
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --success: #4cc9f0;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --danger: #e63946;
+            --warning: #ff9e00;
+            --border-radius: 12px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .logo h1 {
+            font-weight: 700;
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 25px;
+        }
+        
+        .sidebar {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            height: fit-content;
+        }
+        
+        .sidebar-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            color: var(--primary);
+            font-size: 1.3rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 15px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--dark);
+            font-weight: 500;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(67, 97, 238, 0.08);
+            color: var(--primary);
+        }
+        
+        .nav-item i {
+            width: 24px;
+            text-align: center;
+        }
+        
+        .content-area {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .add-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .add-btn:hover {
+            background: var(--secondary);
+            transform: rotate(90deg);
+        }
+        
+        /* 任务列表样式 */
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .task-checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .task-checkbox.checked {
+            background: var(--success);
+            border-color: var(--success);
+        }
+        
+        .task-checkbox.checked::after {
+            content: "✓";
+            color: white;
+            font-size: 14px;
+        }
+        
+        .task-content {
+            flex: 1;
+        }
+        
+        .task-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .task-info {
+            display: flex;
+            gap: 15px;
+            font-size: 0.85rem;
+            color: #777;
+        }
+        
+        .task-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin-top: 5px;
+        }
+        
+        .tag-work {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+        }
+        
+        .tag-study {
+            background: rgba(76, 201, 240, 0.1);
+            color: var(--success);
+        }
+        
+        .tag-personal {
+            background: rgba(255, 158, 0, 0.1);
+            color: var(--warning);
+        }
+        
+        /* 番茄钟样式 */
+        .pomodoro-container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .timer-display {
+            font-size: 4.5rem;
+            font-weight: 700;
+            margin: 20px 0;
+            color: var(--primary);
+            font-family: monospace;
+        }
+        
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        .timer-btn {
+            padding: 12px 25px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+        
+        .btn-start {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-pause {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-reset {
+            background: #e0e0e0;
+            color: var(--dark);
+        }
+        
+        .timer-mode {
+            display: flex;
+            background: rgba(67, 97, 238, 0.1);
+            border-radius: 30px;
+            padding: 5px;
+            margin: 0 auto;
+            max-width: 300px;
+        }
+        
+        .mode-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 30px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .mode-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        /* 目标打卡样式 */
+        .goal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 20px;
+        }
+        
+        .goal-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            border: 2px solid #f0f0f0;
+            cursor: pointer;
+        }
+        
+        .goal-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+        
+        .goal-card.completed {
+            border-color: var(--success);
+        }
+        
+        .goal-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 1.8rem;
+            color: white;
+        }
+        
+        .icon-blue {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+        }
+        
+        .icon-green {
+            background: linear-gradient(135deg, #4cc9f0, #4895ef);
+        }
+        
+        .icon-orange {
+            background: linear-gradient(135deg, #ff9e00, #ff6b00);
+        }
+        
+        .goal-title {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .goal-progress {
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: var(--success);
+            border-radius: 3px;
+        }
+        
+        /* 倒数日样式 */
+        .countdown-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .countdown-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .countdown-title {
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+        
+        .countdown-days {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+        
+        .countdown-label {
+            color: #777;
+            font-size: 0.9rem;
+        }
+        
+        /* 统计图表样式 */
+        .chart-container {
+            position: relative;
+            height: 250px;
+            margin-top: 20px;
+        }
+        
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: #777;
+            font-size: 0.9rem;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .goal-grid, .countdown-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .timer-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .timer-btn {
+                width: 100%;
+                max-width: 250px;
+            }
+        }
+        
+        /* 页脚 */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #777;
+            font-size: 0.9rem;
+            margin-top: 40px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin: 15px 0;
+        }
+        
+        .footer-links a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-hourglass-half"></i>
+                <h1>大象时间管理</h1>
+            </div>
+            <div class="user-actions">
+                <button class="btn btn-outline"><i class="fas fa-sync-alt"></i> 同步数据</button>
+                <button class="btn btn-primary"><i class="fas fa-crown"></i> 关于我们</button>
+                <button class="btn"><i class="fas fa-user"></i></button>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="sidebar-title">
+                    <i class="fas fa-bars"></i>
+                    <h2>功能导航</h2>
+                </div>
+                <div class="nav-item active">
+                    <i class="fas fa-home"></i>
+                    <span>工作台</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>日程管理</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-tasks"></i>
+                    <span>目标打卡</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-clock"></i>
+                    <span>番茄专注</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-calendar-day"></i>
+                    <span>倒数纪念日</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-book"></i>
+                    <span>课程表</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-sticky-note"></i>
+                    <span>笔记灵感</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>数据统计</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>设置</span>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="content-area">
+                    <!-- 任务管理卡片 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-tasks"></i>
+                                <span>今日任务</span>
+                            </div>
+                            <div class="add-btn">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                        </div>
+                        <div class="task-list">
+                            <div class="task-item">
+                                <div class="task-checkbox"></div>
+                                <div class="task-content">
+                                    <div class="task-title">完成项目需求文档</div>
+                                    <div class="task-info">
+                                        <span><i class="far fa-clock"></i> 10:00 AM</span>
+                                        <span><i class="fas fa-bell"></i> 提前15分钟</span>
+                                    </div>
+                                    <div class="task-tag tag-work">工作</div>
+                                </div>
+                            </div>
+                            <div class="task-item">
+                                <div class="task-checkbox"></div>
+                                <div class="task-content">
+                                    <div class="task-title">团队周会</div>
+                                    <div class="task-info">
+                                        <span><i class="far fa-clock"></i> 14:30 PM</span>
+                                        <span><i class="fas fa-user-friends"></i> 会议室A</span>
+                                    </div>
+                                    <div class="task-tag tag-work">工作</div>
+                                </div>
+                            </div>
+                            <div class="task-item">
+                                <div class="task-checkbox checked"></div>
+                                <div class="task-content">
+                                    <div class="task-title">晨跑30分钟</div>
+                                    <div class="task-info">
+                                        <span><i class="far fa-clock"></i> 7:00 AM</span>
+                                        <span><i class="fas fa-check-circle"></i> 已完成</span>
+                                    </div>
+                                    <div class="task-tag tag-personal">健康</div>
+                                </div>
+                            </div>
+                            <div class="task-item">
+                                <div class="task-checkbox"></div>
+                                <div class="task-content">
+                                    <div class="task-title">阅读《时间管理》30页</div>
+                                    <div class="task-info">
+                                        <span><i class="far fa-clock"></i> 21:00 PM</span>
+                                    </div>
+                                    <div class="task-tag tag-study">学习</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 番茄钟卡片 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-clock"></i>
+                                <span>番茄专注</span>
+                            </div>
+                        </div>
+                        <div class="pomodoro-container">
+                            <div class="timer-mode">
+                                <button class="mode-btn active">专注</button>
+                                <button class="mode-btn">短休</button>
+                                <button class="mode-btn">长休</button>
+                            </div>
+                            <div class="timer-display">25:00</div>
+                            <div class="timer-controls">
+                                <button class="timer-btn btn-start">
+                                    <i class="fas fa-play"></i> 开始
+                                </button>
+                                <button class="timer-btn btn-pause">
+                                    <i class="fas fa-pause"></i> 暂停
+                                </button>
+                                <button class="timer-btn btn-reset">
+                                    <i class="fas fa-redo"></i> 重置
+                                </button>
+                            </div>
+                            <p>专注工作25分钟，然后休息5分钟</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 目标打卡卡片 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-flag"></i>
+                                <span>目标打卡</span>
+                            </div>
+                            <div class="add-btn">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                        </div>
+                        <div class="goal-grid">
+                            <div class="goal-card">
+                                <div class="goal-icon icon-blue">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <div class="goal-title">每日阅读</div>
+                                <div class="goal-progress">
+                                    <div class="progress-bar" style="width: 80%"></div>
+                                </div>
+                                <div>16/20 天</div>
+                            </div>
+                            <div class="goal-card completed">
+                                <div class="goal-icon icon-green">
+                                    <i class="fas fa-running"></i>
+                                </div>
+                                <div class="goal-title">每日运动</div>
+                                <div class="goal-progress">
+                                    <div class="progress-bar" style="width: 100%"></div>
+                                </div>
+                                <div>30/30 天</div>
+                            </div>
+                            <div class="goal-card">
+                                <div class="goal-icon icon-orange">
+                                    <i class="fas fa-bed"></i>
+                                </div>
+                                <div class="goal-title">早睡早起</div>
+                                <div class="goal-progress">
+                                    <div class="progress-bar" style="width: 60%"></div>
+                                </div>
+                                <div>12/20 天</div>
+                            </div>
+                            <div class="goal-card">
+                                <div class="goal-icon icon-blue">
+                                    <i class="fas fa-code"></i>
+                                </div>
+                                <div class="goal-title">编程学习</div>
+                                <div class="goal-progress">
+                                    <div class="progress-bar" style="width: 45%"></div>
+                                </div>
+                                <div>9/20 天</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 倒数日卡片 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-calendar-day"></i>
+                                <span>倒数日</span>
+                            </div>
+                            <div class="add-btn">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                        </div>
+                        <div class="countdown-grid">
+                            <div class="countdown-card">
+                                <div class="countdown-title">春节假期</div>
+                                <div class="countdown-days">42</div>
+                                <div class="countdown-label">天后</div>
+                            </div>
+                            <div class="countdown-card">
+                                <div class="countdown-title">项目截止</div>
+                                <div class="countdown-days">15</div>
+                                <div class="countdown-label">天后</div>
+                            </div>
+                            <div class="countdown-card">
+                                <div class="countdown-title">好友生日</div>
+                                <div class="countdown-days">7</div>
+                                <div class="countdown-label">天后</div>
+                            </div>
+                            <div class="countdown-card">
+                                <div class="countdown-title">信用卡还款</div>
+                                <div class="countdown-days">3</div>
+                                <div class="countdown-label">天后</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 数据分析卡片 -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-chart-line"></i>
+                            <span>本周时间分析</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="timeChart"></canvas>
+                    </div>
+                    <div class="stats-cards">
+                        <div class="stat-card">
+                            <div><i class="fas fa-clock" style="color: #4361ee;"></i></div>
+                            <div class="stat-value">28.5</div>
+                            <div class="stat-label">专注时间 (小时)</div>
+                        </div>
+                        <div class="stat-card">
+                            <div><i class="fas fa-check-circle" style="color: #4cc9f0;"></i></div>
+                            <div class="stat-value">86%</div>
+                            <div class="stat-label">任务完成率</div>
+                        </div>
+                        <div class="stat-card">
+                            <div><i class="fas fa-fire" style="color: #ff9e00;"></i></div>
+                            <div class="stat-value">15</div>
+                            <div class="stat-label">连续打卡天数</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>大象时间管理 © 2025 - 全能时间管理工具</p>
+            <div class="footer-links">
+                <a href="#">隐私政策</a>
+                <a href="#">用户协议</a>
+                <a href="#">帮助中心</a>
+                <a href="#">联系我们</a>
+            </div>
+            <p>当前版本: v3.2.1 | 最后更新: 2025-06-12</p>
+        </footer>
+    </div>
+
+    <script>
+        // 番茄钟功能
+        let timer;
+        let minutes = 25;
+        let seconds = 0;
+        let isRunning = false;
+        
+        const timerDisplay = document.querySelector('.timer-display');
+        const startBtn = document.querySelector('.btn-start');
+        const pauseBtn = document.querySelector('.btn-pause');
+        const resetBtn = document.querySelector('.btn-reset');
+        const modeBtns = document.querySelectorAll('.mode-btn');
+        
+        function updateDisplay() {
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        function startTimer() {
+            if (!isRunning) {
+                isRunning = true;
+                timer = setInterval(() => {
+                    if (seconds === 0) {
+                        if (minutes === 0) {
+                            clearInterval(timer);
+                            isRunning = false;
+                            alert('专注时间结束！该休息一下了！');
+                            return;
+                        }
+                        minutes--;
+                        seconds = 59;
+                    } else {
+                        seconds--;
+                    }
+                    updateDisplay();
+                }, 1000);
+            }
+        }
+        
+        function pauseTimer() {
+            clearInterval(timer);
+            isRunning = false;
+        }
+        
+        function resetTimer() {
+            clearInterval(timer);
+            isRunning = false;
+            minutes = 25;
+            seconds = 0;
+            updateDisplay();
+        }
+        
+        function setMode(e) {
+            modeBtns.forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+            
+            pauseTimer();
+            
+            if (e.target.textContent === '专注') {
+                minutes = 25;
+            } else if (e.target.textContent === '短休') {
+                minutes = 5;
+            } else {
+                minutes = 15;
+            }
+            seconds = 0;
+            updateDisplay();
+        }
+        
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        resetBtn.addEventListener('click', resetTimer);
+        modeBtns.forEach(btn => btn.addEventListener('click', setMode));
+        
+        // 任务完成切换
+        const checkboxes = document.querySelectorAll('.task-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('click', function() {
+                this.classList.toggle('checked');
+            });
+        });
+        
+        // 图表初始化
+        const ctx = document.getElementById('timeChart').getContext('2d');
+        const timeChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                datasets: [{
+                    label: '专注时间 (小时)',
+                    data: [3.2, 4.1, 5.5, 4.8, 3.9, 2.5, 4.5],
+                    backgroundColor: 'rgba(67, 97, 238, 0.7)',
+                    borderColor: 'rgba(67, 97, 238, 1)',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 8,
+                        ticks: {
+                            stepSize: 2
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
